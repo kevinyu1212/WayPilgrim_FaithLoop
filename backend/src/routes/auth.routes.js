@@ -49,5 +49,36 @@ router.put('/profile', verifyToken, async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// 로그아웃 (간단한 메시지 응답 - 실제 토큰 무효화는 프론트엔드에서 수행)
+router.post('/logout', verifyToken, (req, res) => {
+    res.json({ message: "성공적으로 로그아웃되었습니다. 안녕히 가세요!" });
+});
+
+// 회원탈퇴 (유저와 관련된 모든 데이터 삭제)
+router.delete('/withdraw', verifyToken, async (req, res) => {
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction(); // 트랜잭션 시작 (모두 삭제되거나, 하나도 안 삭제되거나)
+
+        const userId = req.user.id;
+
+        // 1. 유저의 저널 기록 삭제
+        await connection.query('DELETE FROM journals WHERE user_id = ?', [userId]);
+        // 2. 유저의 뱃지 획득 정보 삭제
+        await connection.query('DELETE FROM user_badges WHERE user_id = ?', [userId]);
+        // 3. 유저 계정 삭제
+        await connection.query('DELETE FROM users WHERE id = ?', [userId]);
+
+        await connection.commit(); // 확정
+        res.json({ message: "회원 탈퇴가 완료되었습니다. 그동안 함께해주셔서 감사합니다." });
+    } catch (err) {
+        await connection.rollback(); // 에러 발생 시 취소
+        res.status(500).json({ error: err.message });
+    } finally {
+        connection.release();
+    }
+});
+
 module.exports = router;
+
 
