@@ -79,6 +79,31 @@ router.delete('/withdraw', verifyToken, async (req, res) => {
     }
 });
 
+// 이메일 중복 확인
+router.get('/check-email', async (req, res) => {
+    try {
+        const { email } = req.query;
+        const [rows] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
+        if (rows.length > 0) {
+            return res.status(409).json({ isAvailable: false, message: "이미 사용 중인 이메일입니다." });
+        }
+        res.json({ isAvailable: true, message: "사용 가능한 이메일입니다." });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 닉네임 중복 확인
+router.get('/check-nickname', async (req, res) => {
+    try {
+        const { nickname } = req.query;
+        const [rows] = await db.query('SELECT id FROM users WHERE nickname = ?', [nickname]);
+        if (rows.length > 0) {
+            return res.status(409).json({ isAvailable: false, message: "이미 사용 중인 닉네임입니다." });
+        }
+        res.json({ isAvailable: true, message: "사용 가능한 닉네임입니다." });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 module.exports = router;
+
 
 
