@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>WayPilgrim Join</title>
+    <style>
+        .msg { font-size: 0.8em; margin-top: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h2>순례길 합류하기</h2>
+    
+    <div>
+        <label>이메일:</label>
+        <input type="email" id="email" placeholder="email@example.com">
+        <button onclick="checkEmail()">중복확인</button>
+        <div id="emailMsg" class="msg"></div>
+    </div>
+
+    <br>
+
+    <div>
+        <label>닉네임:</label>
+        <input type="text" id="nickname" placeholder="순례자1호">
+        <button onclick="checkNickname()">중복확인</button>
+        <div id="nicknameMsg" class="msg"></div>
+    </div>
+
+    <script>
+        async function checkEmail() {
+            const email = document.getElementById('email').value;
+            const res = await fetch(`http://localhost:5000/api/auth/check-email?email=${email}`);
+            const data = await res.json();
+            const msgDiv = document.getElementById('emailMsg');
+            
+            if (data.isAvailable) {
+                msgDiv.innerHTML = "✅ " + data.message;
+                msgDiv.className = "msg success";
+            } else {
+                msgDiv.innerHTML = "❌ " + data.message;
+                msgDiv.className = "msg error";
+            }
+        }
+
+        async function checkNickname() {
+            const nickname = document.getElementById('nickname').value;
+            const res = await fetch(`http://localhost:5000/api/auth/check-nickname?nickname=${nickname}`);
+            const data = await res.json();
+            const msgDiv = document.getElementById('nicknameMsg');
+            
+            if (data.isAvailable) {
+                msgDiv.innerHTML = "✅ " + data.message;
+                msgDiv.className = "msg success";
+            } else {
+                msgDiv.innerHTML = "❌ " + data.message;
+                msgDiv.className = "msg error";
+            }
+        }
+    </script>
+</body>
+</html>
